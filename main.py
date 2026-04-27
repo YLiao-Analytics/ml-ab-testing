@@ -16,10 +16,10 @@ plt.style.use('seaborn-v0_8')
 sns.set_palette("husl")
 
 class TestType(Enum):
-    """Типы A/B тестов"""
-    CONVERSION = "conversion"  # Конверсия (биномиальная метрика)
-    CONTINUOUS = "continuous"  # Непрерывная метрика (среднее значение)
-    COUNT = "count"           # Количественная метрика
+    """A/B Test Types (A/B 测试类型)"""
+    CONVERSION = "conversion"  # Conversion Rate (转化率)
+    CONTINUOUS = "continuous"  # Continuous Metric (连续指标，如均值)
+    COUNT = "count"           # Count Metric (计数指标)
 
 @dataclass
 class TestResult:
@@ -158,10 +158,10 @@ class ABTesting:
         
         # Вывод
         if is_significant:
-            direction = "выше" if rate_b > rate_a else "ниже"
-            conclusion = f"Конверсия группы B статистически значимо {direction} группы A"
+            direction = "higher (更高)" if rate_b > rate_a else "lower (更低)"
+            conclusion = f"Group B conversion is statistically significantly {direction} than Group A. (B组转化率统计显著地{direction}A组)"
         else:
-            conclusion = "Нет статистически значимых различий между группами"
+            conclusion = "No statistically significant difference found. (未发现统计显著差异)"
         
         return TestResult(
             test_type=TestType.CONVERSION,
@@ -221,10 +221,10 @@ class ABTesting:
         
         # Вывод
         if is_significant:
-            direction = "выше" if mean_b > mean_a else "ниже"
-            conclusion = f"Среднее значение группы B статистически значимо {direction} группы A"
+            direction = "higher (更高)" if mean_b > mean_a else "lower (更低)"
+            conclusion = f"Group B conversion is statistically significantly {direction} than Group A. (B组转化率统计显著地{direction}A组)"
         else:
-            conclusion = "Нет статистически значимых различий между группами"
+            conclusion = "No statistically significant difference found. (未发现统计显著差异)"
         
         return TestResult(
             test_type=TestType.CONTINUOUS,
@@ -301,7 +301,7 @@ class ABTesting:
         ax1 = axes[0, 0]
         bars = ax1.bar(conversion_data['group'], conversion_data['rate'], 
                       color=['skyblue', 'lightcoral'])
-        ax1.set_title('Конверсия по группам')
+        ax1.set_title('Conversion by Group (各组转化率)')
         ax1.set_ylabel('Conversion Rate')
         ax1.set_ylim(0, max(conversion_data['rate']) * 1.2)
         
@@ -319,7 +319,7 @@ class ABTesting:
         ax2.errorbar([0], [diff], yerr=[[diff - ci_lower], [ci_upper - diff]], 
                     fmt='o', capsize=5, capthick=2, color='red', markersize=8)
         ax2.axhline(y=0, color='black', linestyle='--', alpha=0.5)
-        ax2.set_title('Доверительный интервал разности')
+        ax2.set_title('Confidence Interval of Difference (差值的置信区间)')
         ax2.set_ylabel('Разность конверсий')
         ax2.set_xlim(-0.5, 0.5)
         ax2.set_xticks([])
@@ -328,7 +328,7 @@ class ABTesting:
         ax3 = axes[1, 0]
         sample_sizes = [result.group_a_size, result.group_b_size]
         ax3.bar(['Group A', 'Group B'], sample_sizes, color=['skyblue', 'lightcoral'])
-        ax3.set_title('Размеры выборок')
+        ax3.set_title('Sample Sizes (样本量)')
         ax3.set_ylabel('Количество пользователей')
         
         # 4. Статистические метрики
@@ -338,7 +338,7 @@ class ABTesting:
         
         colors = ['red' if result.p_value < 0.05 else 'gray', 'blue', 'green']
         bars = ax4.bar(metrics, values, color=colors, alpha=0.7)
-        ax4.set_title('Статистические метрики')
+        ax4.set_title('Statistical Metrics (统计指标)')
         ax4.set_ylabel('Значение')
         
         for bar, value in zip(bars, values):
@@ -356,7 +356,7 @@ class ABTesting:
         ax1 = axes[0, 0]
         ax1.hist(group_a_data, alpha=0.7, bins=30, label='Group A', color='skyblue')
         ax1.hist(group_b_data, alpha=0.7, bins=30, label='Group B', color='lightcoral')
-        ax1.set_title('Распределения метрики')
+        ax1.set_title('Conversion by Group (各组转化率)')
         ax1.set_xlabel(metric_col)
         ax1.set_ylabel('Частота')
         ax1.legend()
@@ -364,7 +364,7 @@ class ABTesting:
         # 2. Box plots
         ax2 = axes[0, 1]
         data.boxplot(column=metric_col, by='group', ax=ax2)
-        ax2.set_title('Box plots по группам')
+        ax2.set_title('Confidence Interval of Difference (差值的置信区间)')
         ax2.set_xlabel('Группа')
         ax2.set_ylabel(metric_col)
         
@@ -376,7 +376,7 @@ class ABTesting:
         ax3.errorbar([0], [diff], yerr=[[diff - ci_lower], [ci_upper - diff]], 
                     fmt='o', capsize=5, capthick=2, color='red', markersize=8)
         ax3.axhline(y=0, color='black', linestyle='--', alpha=0.5)
-        ax3.set_title('Доверительный интервал разности')
+        ax3.set_title('Sample Sizes (样本量)')
         ax3.set_ylabel(f'Разность средних ({metric_col})')
         ax3.set_xlim(-0.5, 0.5)
         ax3.set_xticks([])
@@ -388,7 +388,7 @@ class ABTesting:
         
         colors = ['red' if result.p_value < 0.05 else 'gray', 'blue', 'green']
         bars = ax4.bar(metrics, values, color=colors, alpha=0.7)
-        ax4.set_title('Статистические метрики')
+        ax4.set_title('Statistical Metrics (统计指标)')
         ax4.set_ylabel('Значение')
         
         for bar, value in zip(bars, values):
@@ -457,42 +457,42 @@ class ABTesting:
         """
         report = f"""
         ╔═══════════════════════════════════════════════════════════════╗
-        ║                        A/B TEST REPORT                        ║
+        ║                 A/B TEST REPORT (A/B 测试报告)                 ║
         ╠═══════════════════════════════════════════════════════════════╣
-        ║ Тип теста: {result.test_type.value.upper()}
-        ║ Уровень значимости: {self.alpha}
-        ║ Доверительный уровень: {self.confidence_level:.1%}
+        ║ Test Type (测试类型): {result.test_type.value.upper()}
+        ║ Alpha (显著性水平): {self.alpha}
+        ║ Confidence Level (置信水平): {self.confidence_level:.1%}
         ╠═══════════════════════════════════════════════════════════════╣
-        ║ РАЗМЕРЫ ВЫБОРОК:
-        ║   • Группа A (контроль): {result.group_a_size:,}
-        ║   • Группа B (тест):     {result.group_b_size:,}
-        ║   • Общий размер:        {result.group_a_size + result.group_b_size:,}
+        ║ SAMPLE SIZES (样本量):
+        ║   • Group A (Control/对照组): {result.group_a_size:,}
+        ║   • Group B (Test/实验组):    {result.group_b_size:,}
+        ║   • Total (总样本量):         {result.group_a_size + result.group_b_size:,}
         ╠═══════════════════════════════════════════════════════════════╣
-        ║ ОСНОВНЫЕ МЕТРИКИ:
-        ║   • Группа A: {result.group_a_metric:.4f}
-        ║   • Группа B: {result.group_b_metric:.4f}
-        ║   • Разность: {result.group_b_metric - result.group_a_metric:.4f}
-        ║   • Относительное изменение: {((result.group_b_metric / result.group_a_metric - 1) * 100):+.2f}%
+        ║ KEY METRICS (核心指标):
+        ║   • Group A Metric (A组指标): {result.group_a_metric:.4f}
+        ║   • Group B Metric (B组指标): {result.group_b_metric:.4f}
+        ║   • Absolute Difference (差值): {result.group_b_metric - result.group_a_metric:.4f}
+        ║   • Relative Lift (相对提升): {((result.group_b_metric / result.group_a_metric - 1) * 100):+.2f}%
         ╠═══════════════════════════════════════════════════════════════╣
-        ║ СТАТИСТИЧЕСКИЕ РЕЗУЛЬТАТЫ:
-        ║   • p-value:           {result.p_value:.6f}
-        ║   • Размер эффекта:    {result.effect_size:.4f}
-        ║   • Мощность теста:    {result.power:.4f}
-        ║   • Доверительный интервал: [{result.confidence_interval[0]:+.4f}, {result.confidence_interval[1]:+.4f}]
+        ║ STATISTICAL RESULTS (统计结果):
+        ║   • p-value (P值):           {result.p_value:.6f}
+        ║   • Effect Size (效应量):    {result.effect_size:.4f}
+        ║   • Statistical Power (功效): {result.power:.4f}
+        ║   • Confidence Interval (置信区间): [{result.confidence_interval[0]:+.4f}, {result.confidence_interval[1]:+.4f}]
         ╠═══════════════════════════════════════════════════════════════╣
-        ║ СТАТИСТИЧЕСКАЯ ЗНАЧИМОСТЬ: {"✓ ДА" if result.is_significant else "✗ НЕТ"}
+        ║ STATISTICAL SIGNIFICANCE (统计显著性): {"✓ YES (显著)" if result.is_significant else "✗ NO (不显著)"}
         ║
-        ║ ВЫВОД:
+        ║ CONCLUSION (结论):
         ║ {result.conclusion}
-        ║
+        ╚═══════════════════════════════════════════════════════════════╝
         """
         
         if result.is_significant:
-            report += "║ 🎯 РЕКОМЕНДАЦИЯ: Изменение имеет статистически значимый\n"
-            report += "║    эффект. Рассмотрите внедрение изменений.\n"
+            report += "║ 🎯 RECOMMENDATION (建议): The change has a statistically significant effect.\n"
+            report += "║    Consider implementing the changes. (建议上线/推广该改动。)\n"
         else:
-            report += "║ ⚠️  РЕКОМЕНДАЦИЯ: Недостаточно данных для принятия решения.\n"
-            report += "║    Продолжите тест или увеличьте размер выборки.\n"
+            report += "║ ⚠️  RECOMMENDATION (建议): Insufficient data to make a decision.\n"
+            report += "║    Continue the test or increase the sample size. (数据不足，请延长测试或增加样本量。)\n"
         
         report += "╚═══════════════════════════════════════════════════════════════╝"
         
